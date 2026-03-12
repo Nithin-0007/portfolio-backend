@@ -150,7 +150,7 @@ type PortfolioData {
 type Query {
   getPortfolio(username: String!): PortfolioData
   getSkills(username: String!): [Skill]
-  getProjects(username: String!): [Project]
+  getProjects(username: String!, admin: Boolean): [Project]
   getExperiences(username: String!): [Experience]
   getAchievements(username: String!): [Achievement]
   getEvents(username: String!): [Event]

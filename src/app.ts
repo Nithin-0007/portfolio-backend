@@ -13,7 +13,7 @@ export const handler = async (event: any) => {
       // --- Queries ---
       case 'getPortfolio': return await getPortfolio(args.username);
       case 'getSkills': return await getSkills(args.username);
-      case 'getProjects': return await getProjects(args.username);
+      case 'getProjects': return await getProjects(args.username, args.admin);
       case 'getExperiences': return await getExperiences(args.username);
       case 'getAchievements': return await getAchievements(args.username);
       case 'getEvents': return await getEvents(args.username);
@@ -89,10 +89,12 @@ async function getSkills(username: string) {
   return await prisma.skill.findMany({ where: { userId: user.id }, orderBy: { order: 'asc' } });
 }
 
-async function getProjects(username: string) {
+async function getProjects(username: string, admin?: boolean) {
   const user = await prisma.user.findUnique({ where: { username } });
   if (!user) return [];
-  return await prisma.project.findMany({ where: { userId: user.id, published: true }, orderBy: { order: 'asc' } });
+  const where: any = { userId: user.id };
+  if (!admin) where.published = true;
+  return await prisma.project.findMany({ where, orderBy: { order: 'asc' } });
 }
 
 async function getExperiences(username: string) {
