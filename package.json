@@ -13,11 +13,11 @@
   "description": "",
   "dependencies": {
     "@aws-sdk/client-appsync": "^3.1007.0",
-    "@prisma/client": "^7.5.0"
+    "@prisma/client": "6.4.1"
   },
   "devDependencies": {
     "@types/node": "^25.4.0",
-    "prisma": "^7.5.0",
+    "prisma": "6.4.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }
