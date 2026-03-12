@@ -37,6 +37,8 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - src/app.ts
+        External:
+          - "@prisma/client"
     Properties:
       CodeUri: .
       Handler: src/app.handler
