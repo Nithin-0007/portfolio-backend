@@ -1,0 +1,257 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== AUTH ====================
+
+enum Role {
+  ADMIN
+  VIEWER
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  INACTIVE
+}
+
+model User {
+  id            String         @id @default(auto()) @map("_id") @db.ObjectId
+  username      String         @unique // Critical for domain.com/username
+  name          String
+  email         String         @unique
+  phone         String?
+  password      String
+  role          Role           @default(VIEWER)
+  status        UserStatus     @default(ACTIVE)
+  avatar        String?
+  lastLogin     DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  // Multi-tenant Relations
+  notifications Notification[]
+  chatSessions  ChatSession[]
+  heroContent   HeroContent[]
+  aboutContent  AboutContent[]
+  projects      Project[]
+  skills        Skill[]
+  skillCategories SkillCategory[]
+  experiences   Experience[]
+  achievements  Achievement[]
+  events        Event[]
+  messages      ContactMessage[]
+  siteSettings  SiteSettings[]
+}
+
+// ==================== PORTFOLIO CONTENT ====================
+
+model HeroContent {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @unique @db.ObjectId
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  greeting    String   @default("Hello, World! I'm")
+  name        String   @default("Nithish Kumar")
+  roles       String[] @default(["Full-Stack Developer", "UI/UX Enthusiast", "AI Builder"])
+  description String   @default("I craft beautiful, high-performance web experiences.")
+  updatedAt   DateTime @updatedAt
+}
+
+model AboutContent {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String   @unique @db.ObjectId
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bio1         String   @default("")
+  bio2         String   @default("")
+  highlights   String[] @default([])
+  location     String   @default("Chennai, Tamil Nadu, India")
+  email        String   @default("nithish@example.com")
+  phone        String   @default("+91 98765 43210")
+  availability String   @default("Open to opportunities")
+  github       String   @default("https://github.com/")
+  linkedin     String   @default("https://linkedin.com/")
+  twitter      String   @default("https://twitter.com/")
+  profileImage    String?
+  cvUrl           String?
+  experienceTitle String?
+  snippetRole     String   @default("Full-Stack Dev")
+  snippetPassion  String   @default("Building")
+  snippetCoffee   String   @default("Infinity")
+  updatedAt       DateTime @updatedAt
+}
+
+model Project {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @db.ObjectId
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  description String
+  tags        String[]
+  category    String
+  icon        String   @default("💼")
+  color       String   @default("#7c3aed")
+  github      String?
+  live        String?
+  featured    Boolean  @default(false)
+  published   Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Skill {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label     String
+  value     Int
+  category  String
+  icon      String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SkillCategory {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  icon      String
+  color     String   @default("#7c3aed")
+  skills    String[]
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Experience {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      String
+  company   String
+  period    String
+  type      String
+  icon      String   @default("🏢")
+  color     String   @default("#7c3aed")
+  points    String[]
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ==================== ACHIEVEMENTS ====================
+
+model Achievement {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ==================== EVENTS ====================
+
+model Event {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @db.ObjectId
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  description String
+  date        DateTime
+  endDate     DateTime?
+  location    String
+  virtual     Boolean  @default(false)
+  meetingUrl  String?
+  type        String   @default("OTHER")
+  status      String   @default("DRAFT")
+  featured    Boolean  @default(false)
+  image       String?
+  tags        String[]
+  capacity    Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ==================== NOTIFICATIONS ====================
+
+model Notification {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  message   String
+  type      String   @default("INFO")
+  read      Boolean  @default(false)
+  userId    String?  @db.ObjectId
+  user      User?    @relation(fields: [userId], references: [id])
+  broadcast Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+// ==================== MESSAGES ====================
+
+model ContactMessage {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  email     String
+  subject   String
+  message   String
+  read      Boolean  @default(false)
+  replied   Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+// ==================== CHAT ====================
+
+model ChatSession {
+  id        String        @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String?       @db.ObjectId
+  user      User?         @relation(fields: [userId], references: [id])
+  sessionId String        @unique
+  messages  ChatMessage[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model ChatMessage {
+  id        String      @id @default(auto()) @map("_id") @db.ObjectId
+  sessionId String
+  session   ChatSession @relation(fields: [sessionId], references: [sessionId])
+  role      String
+  content   String
+  createdAt DateTime    @default(now())
+}
+
+// ==================== SETTINGS ====================
+
+model Settings {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  ollamaModel    String   @default("llama3")
+  systemPrompt   String   @default("You are a helpful AI assistant for a developer portfolio.")
+  chatEnabled    Boolean  @default(true)
+  portfolioTitle String   @default("Nithish Kumar | Full-Stack Developer")
+  updatedAt      DateTime @updatedAt
+}
+
+// ==================== SITE SETTINGS ====================
+
+model SiteSettings {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId          String   @unique @db.ObjectId
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  heroTagline     String   @default("Building beautiful web experiences, one line at a time.")
+  footerText      String   @default("© 2026 Nithish Kumar. All rights reserved.")
+  heroStats       String[] @default(["25+|Projects Shipped", "3+|Years Experience", "10k+|Lines of Code"])
+  quickLinks      String[] @default(["Home|#home", "About|#about", "Skills|#skills", "Projects|#projects", "Experience|#experience", "Contact|#contact"])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}

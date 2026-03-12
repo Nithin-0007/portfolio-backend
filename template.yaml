@@ -1,0 +1,137 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Portfolio AppSync Backend - Full API Suite
+
+Parameters:
+  DatabaseUrl:
+    Type: String
+    Description: MongoDB Connection URL
+
+Resources:
+  # AppSync API
+  PortfolioApi:
+    Type: AWS::AppSync::GraphQLApi
+    Properties:
+      Name: PortfolioGraphQLApi
+      AuthenticationType: API_KEY
+
+  PortfolioApiKey:
+    Type: AWS::AppSync::ApiKey
+    Properties:
+      ApiId: !GetAtt PortfolioApi.ApiId
+
+  PortfolioSchema:
+    Type: AWS::AppSync::GraphQLSchema
+    Properties:
+      ApiId: !GetAtt PortfolioApi.ApiId
+      DefinitionS3Location: ./schema.graphql
+
+  # Lambda Function (Prisma + MongoDB)
+  PortfolioLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./src/
+      Handler: app.handler
+      Runtime: nodejs20.x
+      Timeout: 120
+      MemorySize: 512
+      Environment:
+        Variables:
+          DATABASE_URL: !Ref DatabaseUrl
+
+  # AppSync Data Source
+  LambdaDataSource:
+    Type: AWS::AppSync::DataSource
+    Properties:
+      ApiId: !GetAtt PortfolioApi.ApiId
+      Name: PortfolioLambdaDataSource
+      Type: AWS_LAMBDA
+      LambdaConfig:
+        LambdaFunctionArn: !GetAtt PortfolioLambda.Arn
+      ServiceRoleArn: !GetAtt AppSyncServiceRole.Arn
+
+  # --- Query Resolvers ---
+  GetPortfolioResolver:
+    Type: AWS::AppSync::Resolver
+    Properties:
+      ApiId: !GetAtt PortfolioApi.ApiId
+      TypeName: Query
+      FieldName: getPortfolio
+      DataSourceName: !GetAtt LambdaDataSource.Name
+
+  GetSkillsResolver:
+    Type: AWS::AppSync::Resolver
+    Properties:
+      ApiId: !GetAtt PortfolioApi.ApiId
+      TypeName: Query
+      FieldName: getSkills
+      DataSourceName: !GetAtt LambdaDataSource.Name
+
+  GetProjectsResolver:
+    Type: AWS::AppSync::Resolver
+    Properties:
+      ApiId: !GetAtt PortfolioApi.ApiId
+      TypeName: Query
+      FieldName: getProjects
+      DataSourceName: !GetAtt LambdaDataSource.Name
+
+  # --- Mutation Resolvers ---
+  SaveHeroResolver:
+    Type: AWS::AppSync::Resolver
+    Properties:
+      ApiId: !GetAtt PortfolioApi.ApiId
+      TypeName: Mutation
+      FieldName: saveHero
+      DataSourceName: !GetAtt LambdaDataSource.Name
+
+  UpsertProjectResolver:
+    Type: AWS::AppSync::Resolver
+    Properties:
+      ApiId: !GetAtt PortfolioApi.ApiId
+      TypeName: Mutation
+      FieldName: upsertProject
+      DataSourceName: !GetAtt LambdaDataSource.Name
+
+  SendMessageResolver:
+    Type: AWS::AppSync::Resolver
+    Properties:
+      ApiId: !GetAtt PortfolioApi.ApiId
+      TypeName: Mutation
+      FieldName: sendMessage
+      DataSourceName: !GetAtt LambdaDataSource.Name
+
+  ChatWithAIResolver:
+    Type: AWS::AppSync::Resolver
+    Properties:
+      ApiId: !GetAtt PortfolioApi.ApiId
+      TypeName: Mutation
+      FieldName: chatWithAI
+      DataSourceName: !GetAtt LambdaDataSource.Name
+
+  # IAM Roles
+  AppSyncServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: appsync.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: AppSyncLambdaPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: lambda:InvokeFunction
+                Resource: !GetAtt PortfolioLambda.Arn
+
+Outputs:
+  GraphQLUrl:
+    Description: GraphQL API URL
+    Value: !GetAtt PortfolioApi.GraphQLUrl
+  ApiKey:
+    Description: AppSync API Key
+    Value: !GetAtt PortfolioApiKey.ApiKey

@@ -1,0 +1,294 @@
+type User {
+  id: ID!
+  username: String!
+  name: String!
+  email: String!
+  phone: String
+  role: String!
+  status: String!
+  avatar: String
+  heroContent: HeroContent
+  aboutContent: AboutContent
+  projects: [Project]
+  skills: [Skill]
+  experiences: [Experience]
+}
+
+type HeroContent {
+  id: ID!
+  greeting: String
+  name: String
+  roles: [String]
+  description: String
+}
+
+type AboutContent {
+  id: ID!
+  bio1: String
+  bio2: String
+  highlights: [String]
+  location: String
+  email: String
+  phone: String
+  availability: String
+  github: String
+  linkedin: String
+  twitter: String
+  profileImage: String
+  cvUrl: String
+  snippetRole: String
+  snippetPassion: String
+  snippetCoffee: String
+}
+
+type Project {
+  id: ID!
+  title: String!
+  description: String!
+  tags: [String]
+  category: String
+  icon: String
+  color: String
+  github: String
+  live: String
+  featured: Boolean
+  published: Boolean
+  order: Int
+}
+
+type Skill {
+  id: ID!
+  label: String!
+  value: Int!
+  category: String!
+  icon: String
+  order: Int
+}
+
+type Experience {
+  id: ID!
+  role: String!
+  company: String!
+  period: String!
+  type: String!
+  icon: String
+  color: String
+  points: [String]
+  order: Int
+}
+
+type ChatMessage {
+  id: ID!
+  sessionId: String!
+  role: String!
+  content: String!
+  createdAt: String!
+}
+
+type Achievement {
+  id: ID!
+  title: String!
+  order: Int
+}
+
+type Event {
+  id: ID!
+  title: String!
+  description: String
+  date: String!
+  endDate: String
+  location: String
+  virtual: Boolean
+  meetingUrl: String
+  type: String
+  status: String
+  featured: Boolean
+  image: String
+  tags: [String]
+  capacity: Int
+}
+
+type Notification {
+  id: ID!
+  title: String!
+  message: String!
+  type: String
+  read: Boolean
+  createdAt: String
+}
+
+type ContactMessage {
+  id: ID!
+  name: String!
+  email: String!
+  subject: String!
+  message: String!
+  read: Boolean
+  createdAt: String
+}
+
+type SiteSettings {
+  id: ID!
+  heroTagline: String
+  footerText: String
+  heroStats: [String]
+  quickLinks: [String]
+}
+
+type PortfolioData {
+  user: User
+  hero: HeroContent
+  about: AboutContent
+  projects: [Project]
+  skills: [Skill]
+  experiences: [Experience]
+  achievements: [Achievement]
+  events: [Event]
+  siteSettings: SiteSettings
+}
+
+type Query {
+  getPortfolio(username: String!): PortfolioData
+  getSkills(username: String!): [Skill]
+  getProjects(username: String!): [Project]
+  getExperiences(username: String!): [Experience]
+  getAchievements(username: String!): [Achievement]
+  getEvents(username: String!): [Event]
+  getMessages(username: String!): [ContactMessage]
+  getNotifications(username: String!): [Notification]
+}
+
+type Mutation {
+  saveHero(userId: ID!, input: HeroInput!): HeroContent
+  saveAbout(userId: ID!, input: AboutInput!): AboutContent
+  
+  # CRUD for dynamic lists
+  upsertProject(userId: ID!, input: ProjectInput!): Project
+  deleteProject(id: ID!): Boolean
+  
+  upsertSkill(userId: ID!, input: SkillInput!): Skill
+  deleteSkill(id: ID!): Boolean
+  
+  upsertExperience(userId: ID!, input: ExperienceInput!): Experience
+  deleteExperience(id: ID!): Boolean
+
+  upsertAchievement(userId: ID!, input: AchievementInput!): Achievement
+  deleteAchievement(id: ID!): Boolean
+
+  upsertEvent(userId: ID!, input: EventInput!): Event
+  deleteEvent(id: ID!): Boolean
+
+  sendMessage(
+    name: String!
+    email: String!
+    subject: String!
+    message: String!
+    targetUsername: String!
+  ): ContactMessage
+  
+  chatWithAI(
+    message: String!
+    sessionId: String!
+    history: [ChatInputMessage]
+  ): ChatMessage
+}
+
+input HeroInput {
+  greeting: String
+  name: String
+  roles: [String]
+  description: String
+}
+
+input AboutInput {
+  bio1: String
+  bio2: String
+  highlights: [String]
+  location: String
+  email: String
+  phone: String
+  availability: String
+  github: String
+  linkedin: String
+  twitter: String
+  profileImage: String
+  cvUrl: String
+  snippetRole: String
+  snippetPassion: String
+  snippetCoffee: String
+}
+
+input ProjectInput {
+  id: ID 
+  title: String!
+  description: String!
+  tags: [String]
+  category: String
+  icon: String
+  color: String
+  github: String
+  live: String
+  featured: Boolean
+  published: Boolean
+  order: Int
+}
+
+input SkillInput {
+  id: ID
+  label: String!
+  value: Int!
+  category: String!
+  icon: String
+  order: Int
+}
+
+input ExperienceInput {
+  id: ID
+  role: String!
+  company: String!
+  period: String!
+  type: String!
+  icon: String
+  color: String
+  points: [String]
+  order: Int
+}
+
+input AchievementInput {
+  id: ID
+  title: String!
+  order: Int
+}
+
+input EventInput {
+  id: ID
+  title: String!
+  description: String
+  date: String!
+  endDate: String
+  location: String
+  virtual: Boolean
+  meetingUrl: String
+  type: String
+  status: String
+  featured: Boolean
+  image: String
+  tags: [String]
+  capacity: Int
+}
+
+input ChatInputMessage {
+  role: String!
+  content: String!
+}
+
+type Subscription {
+  onChatUpdate(sessionId: String!): ChatMessage
+    @aws_subscribe(mutations: ["chatWithAI"])
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}
