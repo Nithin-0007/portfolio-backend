@@ -41,4 +41,5 @@ jobs:
             --stack-name portfolio-backend \
             --capabilities CAPABILITY_IAM \
             --parameter-overrides DatabaseUrl=${{ secrets.DATABASE_URL }} \
-            --region us-east-1
+            --region us-east-1 \
+            --resolve-s3

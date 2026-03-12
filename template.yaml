@@ -24,7 +24,7 @@ Resources:
     Type: AWS::AppSync::GraphQLSchema
     Properties:
       ApiId: !GetAtt PortfolioApi.ApiId
-      DefinitionS3Location: ./schema.graphql
+      DefinitionS3Location: schema.graphql
 
   # Lambda Function (Prisma + MongoDB)
   PortfolioLambda:
