@@ -36,6 +36,7 @@ type AboutContent {
   twitter: String
   profileImage: String
   cvUrl: String
+  experienceTitle: String
   snippetRole: String
   snippetPassion: String
   snippetCoffee: String
@@ -213,6 +214,7 @@ input AboutInput {
   twitter: String
   profileImage: String
   cvUrl: String
+  experienceTitle: String
   snippetRole: String
   snippetPassion: String
   snippetCoffee: String

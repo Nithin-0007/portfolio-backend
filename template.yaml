@@ -30,14 +30,22 @@ Resources:
   PortfolioLambda:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./src/
-      Handler: app.handler
+      CodeUri: .
+      Handler: src/app.handler
       Runtime: nodejs20.x
       Timeout: 120
       MemorySize: 512
       Environment:
         Variables:
           DATABASE_URL: !Ref DatabaseUrl
+      Metadata:
+        BuildMethod: esbuild
+        BuildProperties:
+          Minify: true
+          Target: "es2020"
+          Sourcemap: true
+          EntryPoints: 
+            - src/app.ts
 
   # AppSync Data Source
   LambdaDataSource:
