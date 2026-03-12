@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'backend-service/**'
 
 jobs:
   deploy:
@@ -26,26 +24,19 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        run: |
-          cd backend-service
-          npm install
+        run: npm install
 
       - name: Generate Prisma Client
-        run: |
-          cd backend-service
-          npx prisma generate
+        run: npx prisma generate
 
       - name: Setup SAM CLI
         uses: aws-actions/setup-sam@v2
 
       - name: SAM Build
-        run: |
-          cd backend-service
-          sam build
+        run: sam build
 
       - name: SAM Deploy
         run: |
-          cd backend-service
           sam deploy --no-confirm-changeset --no-fail-on-empty-changeset \
             --stack-name portfolio-backend \
             --capabilities CAPABILITY_IAM \
