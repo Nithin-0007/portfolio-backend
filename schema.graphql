@@ -148,28 +148,139 @@ type PortfolioData {
   siteSettings: SiteSettings
 }
 
+# Pagination types
+type PageInfo {
+  total: Int!
+  page: Int!
+  limit: Int!
+  totalPages: Int!
+  hasNext: Boolean!
+  hasPrev: Boolean!
+}
+
+type ProjectsPage {
+  items: [Project]!
+  pageInfo: PageInfo!
+}
+
+type SkillsPage {
+  items: [Skill]!
+  pageInfo: PageInfo!
+}
+
+type ExperiencesPage {
+  items: [Experience]!
+  pageInfo: PageInfo!
+}
+
+type AchievementsPage {
+  items: [Achievement]!
+  pageInfo: PageInfo!
+}
+
+type EventsPage {
+  items: [Event]!
+  pageInfo: PageInfo!
+}
+
+type MessagesPage {
+  items: [ContactMessage]!
+  pageInfo: PageInfo!
+}
+
+type NotificationsPage {
+  items: [Notification]!
+  pageInfo: PageInfo!
+}
+
 type Query {
   getPortfolio(username: String!): PortfolioData
-  getSkills(username: String!): [Skill]
-  getProjects(username: String!, admin: Boolean): [Project]
-  getExperiences(username: String!): [Experience]
-  getAchievements(username: String!): [Achievement]
-  getEvents(username: String!): [Event]
-  getMessages(username: String!): [ContactMessage]
-  getNotifications(username: String!): [Notification]
+
+  getProjects(
+    username: String!
+    admin: Boolean
+    page: Int
+    limit: Int
+    search: String
+    category: String
+    featured: Boolean
+    published: Boolean
+    sortBy: String
+    sortOrder: String
+  ): ProjectsPage
+
+  getSkills(
+    username: String!
+    page: Int
+    limit: Int
+    search: String
+    category: String
+    sortBy: String
+    sortOrder: String
+  ): SkillsPage
+
+  getExperiences(
+    username: String!
+    page: Int
+    limit: Int
+    search: String
+    type: String
+    sortBy: String
+    sortOrder: String
+  ): ExperiencesPage
+
+  getAchievements(
+    username: String!
+    page: Int
+    limit: Int
+    search: String
+    sortBy: String
+    sortOrder: String
+  ): AchievementsPage
+
+  getEvents(
+    username: String!
+    page: Int
+    limit: Int
+    search: String
+    type: String
+    status: String
+    featured: Boolean
+    sortBy: String
+    sortOrder: String
+  ): EventsPage
+
+  getMessages(
+    username: String!
+    page: Int
+    limit: Int
+    search: String
+    read: Boolean
+    sortBy: String
+    sortOrder: String
+  ): MessagesPage
+
+  getNotifications(
+    username: String!
+    page: Int
+    limit: Int
+    read: Boolean
+    type: String
+    sortBy: String
+    sortOrder: String
+  ): NotificationsPage
 }
 
 type Mutation {
   saveHero(userId: ID!, input: HeroInput!): HeroContent
   saveAbout(userId: ID!, input: AboutInput!): AboutContent
-  
-  # CRUD for dynamic lists
+
   upsertProject(userId: ID!, input: ProjectInput!): Project
   deleteProject(id: ID!): Boolean
-  
+
   upsertSkill(userId: ID!, input: SkillInput!): Skill
   deleteSkill(id: ID!): Boolean
-  
+
   upsertExperience(userId: ID!, input: ExperienceInput!): Experience
   deleteExperience(id: ID!): Boolean
 
@@ -179,6 +290,9 @@ type Mutation {
   upsertEvent(userId: ID!, input: EventInput!): Event
   deleteEvent(id: ID!): Boolean
 
+  deleteMessage(id: ID!): Boolean
+  markMessageRead(id: ID!): ContactMessage
+
   sendMessage(
     name: String!
     email: String!
@@ -186,7 +300,7 @@ type Mutation {
     message: String!
     targetUsername: String!
   ): ContactMessage
-  
+
   chatWithAI(
     message: String!
     sessionId: String!
@@ -221,7 +335,7 @@ input AboutInput {
 }
 
 input ProjectInput {
-  id: ID 
+  id: ID
   title: String!
   description: String!
   tags: [String]
