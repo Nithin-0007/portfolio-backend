@@ -42,4 +42,12 @@ jobs:
           cp node_modules/.prisma/client/schema.prisma .aws-sam/build/PortfolioLambda/node_modules/.prisma/client/
 
       - name: SAM Deploy
-        run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --stack-name portfolio-backend --capabilities CAPABILITY_IAM --parameter-overrides DatabaseUrl=${{ secrets.DATABASE_URL }} --region us-east-1 --resolve-s3
+        run: >
+          sam deploy
+          --no-confirm-changeset
+          --no-fail-on-empty-changeset
+          --stack-name portfolio-backend
+          --capabilities CAPABILITY_IAM
+          --resolve-s3
+          --region us-east-1
+          --parameter-overrides DatabaseUrl="${{ secrets.DATABASE_URL }}"
