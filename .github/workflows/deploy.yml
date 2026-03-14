@@ -35,6 +35,12 @@ jobs:
       - name: SAM Build
         run: sam build
 
+      - name: Copy Prisma Binary
+        run: |
+          mkdir -p .aws-sam/build/PortfolioLambda/node_modules/.prisma/client
+          cp node_modules/.prisma/client/libquery_engine-rhel-openssl-3.0.x.so.node .aws-sam/build/PortfolioLambda/node_modules/.prisma/client/
+          cp node_modules/.prisma/client/schema.prisma .aws-sam/build/PortfolioLambda/node_modules/.prisma/client/
+
       - name: SAM Deploy
         run: |
           sam deploy --no-confirm-changeset --no-fail-on-empty-changeset \
